@@ -28,7 +28,6 @@ public class Motorbike implements Serializable{
     private String model;
 
     @Column(nullable = false)
-    @Size(min = 4, max = 4)
     private int year;
 
     @Column(nullable = false)

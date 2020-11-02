@@ -21,13 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.hamcrest.CoreMatchers.is;
-
 
 @WebMvcTest(controllers = MotorbikeController.class)
 @ActiveProfiles("test")
@@ -103,6 +98,27 @@ class MotorbikeControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenCreateNewMotorbikeWithBadYear1() throws Exception {
+        final Motorbike motorbike = new Motorbike(1, "BMW", "R 1250 GS Adventure", 1000, 0);
+
+        this.mockMvc.perform(post("/motorbike")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(motorbike)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewMotorbikeWithBadYear2() throws Exception {
+        int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
+        final Motorbike motorbike = new Motorbike(1, "BMW", "R 1250 GS Adventure", nextYear , 0);
+
+        this.mockMvc.perform(post("/motorbike")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(motorbike)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void shouldReturn400WhenCreateNewMotorbikeWithoutModel() throws Exception {
         final Motorbike motorbike = new Motorbike(1, "BMW", null, 2020, 0);
 
@@ -123,7 +139,7 @@ class MotorbikeControllerTest {
     }
 
     @Test
-    void shouldUpdateUser() throws Exception {
+    void shouldUpdateMotorbike() throws Exception {
         int motorbikeId = 1;
         final Motorbike motorbike = new Motorbike(motorbikeId, "BMW", "R 1250 GS Adventure", 2020, 0);
         BDDMockito.given(motorbikeService.getMotorbike(motorbikeId)).willReturn(motorbike);
@@ -149,6 +165,5 @@ class MotorbikeControllerTest {
 
         this.mockMvc.perform(delete("/{idMotorbike}", motorbike.getIdMotorbike()))
                 .andExpect(status().isNoContent());
-
     }
 }

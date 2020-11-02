@@ -5,12 +5,11 @@ import cz.upce.nnpro.motorbikes.model.dto.MotorbikeDto;
 import cz.upce.nnpro.motorbikes.service.MotorbikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.util.Calendar;
 import java.util.List;
 
 @RestController
@@ -21,7 +20,8 @@ public class MotorbikeController {
     @Transactional(rollbackOn = Exception.class)
     @PostMapping("/motorbike")
     public ResponseEntity<Motorbike> createMotorbike(@RequestBody MotorbikeDto motorbikeDto) {
-        if(motorbikeDto.getMake() == null || motorbikeDto.getModel() == null)
+        if(motorbikeDto.getMake() == null || motorbikeDto.getModel() == null
+                || motorbikeDto.getYear() < 1900 || motorbikeDto.getYear() > Calendar.getInstance().get(Calendar.YEAR))
             return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(motorbikeService.createMotorbike(motorbikeDto));
     }
@@ -29,6 +29,8 @@ public class MotorbikeController {
     @Transactional(rollbackOn = Exception.class)
     @PutMapping("/motorbike/{idMotorbike}")
     public ResponseEntity<Motorbike> editMotorbike(@RequestBody MotorbikeDto motorbikeDto, @PathVariable int idMotorbike) {
+        if(motorbikeDto.getMake() == null || motorbikeDto.getModel() == null)
+            return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(motorbikeService.editMotorbike(motorbikeDto, idMotorbike));
     }
 
@@ -43,7 +45,7 @@ public class MotorbikeController {
     }
 
     @GetMapping("/motorbike/{idMotorbike}")
-    public ResponseEntity getMotorbike(@PathVariable int idMotorbike){
+    public ResponseEntity<Motorbike> getMotorbike(@PathVariable int idMotorbike){
         Motorbike motorbike = motorbikeService.getMotorbike(idMotorbike);
         if(motorbike != null)
             return ResponseEntity.ok(motorbike);
@@ -52,7 +54,7 @@ public class MotorbikeController {
     }
 
     @GetMapping("/motorbikes")
-    public ResponseEntity<List<Motorbike>> getMessages(){
+    public ResponseEntity<List<Motorbike>> getMotorbikes(){
         return ResponseEntity.ok(motorbikeService.getAllMotorbikes());
     }
 }
